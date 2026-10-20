@@ -16,7 +16,7 @@
 #include <I2A_WiFi_IoT_v2.h>
 
 // ---------- Version ----------
-const char CODYPI_VERSION[] = "1.19.5"; //2000ms delay commented in setup()::check Joystick functionality
+const char CODYPI_VERSION[] = "1.19.6"; //2000ms delay commented in setup()::check Joystick functionality
 
 // ---------- Config ----------
 const uint8_t PKT_LEN   = 20; // 4 bytes header + 16 bytes payload
@@ -196,7 +196,9 @@ void handleSerialPackets() {
         }
 
         if (isIdentify) {
-          writeResponse(IDENTIFY_RESPONSE);
+          uint8_t response[PKT_LEN] = {0};
+          snprintf((char *)response, sizeof(response), "CN@@CJP-Neo|%s", CODYPI_VERSION);
+          writeResponse(response);
           continue;
         }
 
