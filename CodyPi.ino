@@ -16,7 +16,7 @@
 #include <I2A_WiFi_IoT_v2.h>
 
 // ---------- Version ----------
-const char CODYPI_VERSION[] = "1.19.6"; //2000ms delay commented in setup()::check Joystick functionality
+const char CODYPI_VERSION[] = "1.19.7"; //2000ms delay commented in setup()::check Joystick functionality
 
 // ---------- Config ----------
 const uint8_t PKT_LEN   = 20; // 4 bytes header + 16 bytes payload
@@ -199,6 +199,20 @@ void handleSerialPackets() {
           uint8_t response[PKT_LEN] = {0};
           snprintf((char *)response, sizeof(response), "CN@@CJP-Neo|%s", CODYPI_VERSION);
           writeResponse(response);
+          continue;
+        }
+
+        // Text is separate from numeric formatting: four literal characters.
+        bool is7Text = (rxBuf[4]=='7' && rxBuf[5]=='T' && rxBuf[6]=='X' && rxBuf[7]=='T' && rxBuf[8]=='@' && rxBuf[9]=='@');
+        if (is7Text) {
+          if (rxBuf[10]=='0' && (rxBuf[11]=='0' || rxBuf[11]=='2')) {
+            char text[5] = {0}; bool printable = true;
+            for (uint8_t i=0; i<4; ++i) {
+              text[i] = (char)rxBuf[12+i];
+              if (rxBuf[12+i]<32 || rxBuf[12+i]>126) printable=false;
+            }
+            if (printable) write_to_sevensegment_Text_V2(text, rxBuf[11]-'0');
+          }
           continue;
         }
 
